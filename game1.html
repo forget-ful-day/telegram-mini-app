@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Угадай число</title>
+</head>
+<body>
+    <h1>Угадай число от 1 до 100</h1>
+    <input type="number" id="guess" min="1" max="100">
+    <button onclick="checkGuess()">Проверить</button>
+    <p id="result"></p>
+
+    <script>
+        const secretNumber = Math.floor(Math.random() * 100) + 1;
+        let attempts = 0;
+
+        function checkGuess() {
+            const guess = parseInt(document.getElementById('guess').value);
+            attempts++;
+            
+            if (guess === secretNumber) {
+                document.getElementById('result').textContent = 
+                    `Поздравляю! Вы угадали за ${attempts} попыток!`;
+            } else if (guess < secretNumber) {
+                document.getElementById('result').textContent = 'Слишком мало!';
+            } else {
+                document.getElementById('result').textContent = 'Слишком много!';
+            }
+        }
+    </script>
+</body>
+</html>

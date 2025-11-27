@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Камень-Ножницы-Бумага</title>
+</head>
+<body>
+    <h1>Камень-Ножницы-Бумага</h1>
+    <button onclick="play('rock')">✊ Камень</button>
+    <button onclick="play('paper')">✋ Бумага</button>
+    <button onclick="play('scissors')">✌️ Ножницы</button>
+    <p id="result"></p>
+
+    <script>
+        function play(playerChoice) {
+            const choices = ['rock', 'paper', 'scissors'];
+            const computerChoice = choices[Math.floor(Math.random() * 3)];
+            
+            let result;
+            if (playerChoice === computerChoice) {
+                result = "Ничья!";
+            } else if (
+                (playerChoice === 'rock' && computerChoice === 'scissors') ||
+                (playerChoice === 'paper' && computerChoice === 'rock') ||
+                (playerChoice === 'scissors' && computerChoice === 'paper')
+            ) {
+                result = "Вы выиграли!";
+            } else {
+                result = "Компьютер выиграл!";
+            }
+            
+            document.getElementById('result').textContent = 
+                `Вы: ${playerChoice}, Компьютер: ${computerChoice}. ${result}`;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Игра Память</title>
+    <style>
+        .card {
+            width: 50px;
+            height: 50px;
+            background-color: #ccc;
+            display: inline-block;
+            margin: 5px;
+            text-align: center;
+            line-height: 50px;
+            cursor: pointer;
+        }
+        .hidden {
+            background-color: #666;
+            color: transparent;
+        }
+    </style>
+</head>
+<body>
+    <h1>Игра Память</h1>
+    <div id="game"></div>
+
+    <script>
+        const symbols = ['A', 'A', 'B', 'B', 'C', 'C', 'D', 'D'];
+        let flippedCards = [];
+        let matchedPairs = 0;
+
+        // Перемешиваем карты
+        symbols.sort(() => Math.random() - 0.5);
+
+        // Создаем игровое поле
+        const gameDiv = document.getElementById('game');
+        symbols.forEach((symbol, index) => {
+            const card = document.createElement('div');
+            card.className = 'card hidden';
+            card.textContent = symbol;
+            card.dataset.index = index;
+            card.onclick = flipCard;
+            gameDiv.appendChild(card);
+        });
+
+        function flipCard() {
+            const card = this;
+            if (flippedCards.length < 2 && !card.classList.contains('revealed')) {
+                card.classList.remove('hidden');
+                flippedCards.push(card);
+                
+                if (flippedCards.length === 2) {
+                    setTimeout(checkMatch, 500);
+                }
+            }
+        }
+
+        function checkMatch() {
+            const [card1, card2] = flippedCards;
+            
+            if (card1.textContent === card2.textContent) {
+                card1.classList.add('revealed');
+                card2.classList.add('revealed');
+                matchedPairs++;
+                
+                if (matchedPairs === symbols.length / 2) {
+                    alert('Поздравляем! Вы выиграли!');
+                }
+            } else {
+                card1.classList.add('hidden');
+                card2.classList.add('hidden');
+            }
+            
+            flippedCards = [];
+        }
+    </script>
+</body>
+</html>

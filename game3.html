@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Кликер</title>
+</head>
+<body>
+    <h1>Счет: <span id="score">0</span></h1>
+    <button onclick="clickButton()">Кликни меня!</button>
+    <br><br>
+    <button onclick="buyUpgrade()" id="upgrade">Улучшение (10 очков)</button>
+
+    <script>
+        let score = 0;
+        let clickValue = 1;
+        let upgradeCost = 10;
+
+        function clickButton() {
+            score += clickValue;
+            updateDisplay();
+        }
+
+        function buyUpgrade() {
+            if (score >= upgradeCost) {
+                score -= upgradeCost;
+                clickValue += 1;
+                upgradeCost = Math.floor(upgradeCost * 1.5);
+                updateDisplay();
+                document.getElementById('upgrade').textContent = 
+                    `Улучшение (${upgradeCost} очков)`;
+            }
+        }
+
+        function updateDisplay() {
+            document.getElementById('score').textContent = score;
+        }
+    </script>
+</body>
+</html>
