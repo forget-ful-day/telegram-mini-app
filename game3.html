@@ -1,169 +1,457 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <title>Змейка</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Русская рулетка</title>
     <style>
-        body {
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #e94560;
+            text-shadow: 0 0 10px rgba(233, 69, 96, 0.5);
+        }
+        
+        .revolver {
+            position: relative;
+            width: 300px;
+            height: 200px;
+            margin: 30px auto;
+        }
+        
+        .revolver-body {
+            width: 100%;
+            height: 100%;
+            background: #333;
+            border-radius: 20px;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+        
+        .cylinder {
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            background: #222;
+            border-radius: 50%;
+            top: 10px;
+            left: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
+        }
+        
+        .chamber {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: #444;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+        
+        .chamber.active {
+            background: #e94560;
+            box-shadow: 0 0 10px #e94560;
+        }
+        
+        .chamber.fired {
+            background: #ff9a00;
+            box-shadow: 0 0 10px #ff9a00;
+        }
+        
+        .hammer {
+            position: absolute;
+            width: 40px;
+            height: 60px;
+            background: #555;
+            top: 70px;
+            left: 20px;
+            border-radius: 5px;
+            transform-origin: bottom center;
+            transition: transform 0.5s ease;
+        }
+        
+        .hammer.cocked {
+            transform: rotate(-30deg);
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #e94560;
+        }
+        
+        .controls {
             display: flex;
             justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            font-family: Arial, sans-serif;
-        }
-        .game-container {
-            text-align: center;
-            background: rgba(255,255,255,0.1);
-            padding: 20px;
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-        }
-        canvas {
-            border: 2px solid white;
-            background: #000;
-            display: block;
-            margin: 0 auto;
-        }
-        .controls {
+            gap: 20px;
             margin-top: 20px;
-            color: white;
         }
+        
         button {
-            padding: 10px 20px;
-            margin: 10px;
+            padding: 12px 25px;
+            font-size: 1.1rem;
             border: none;
-            border-radius: 5px;
-            background: #ff6b6b;
-            color: white;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 16px;
+            transition: all 0.3s ease;
+            font-weight: bold;
         }
-        button:hover {
-            background: #ff5252;
+        
+        #spin-btn {
+            background: #0f3460;
+            color: white;
+        }
+        
+        #spin-btn:hover {
+            background: #1a508b;
+            transform: translateY(-3px);
+        }
+        
+        #fire-btn {
+            background: #e94560;
+            color: white;
+        }
+        
+        #fire-btn:hover {
+            background: #ff6b81;
+            transform: translateY(-3px);
+        }
+        
+        #reset-btn {
+            background: #2ecc71;
+            color: white;
+        }
+        
+        #reset-btn:hover {
+            background: #27ae60;
+            transform: translateY(-3px);
+        }
+        
+        button:disabled {
+            background: #555;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .message.success {
+            background: rgba(46, 204, 113, 0.2);
+            color: #2ecc71;
+        }
+        
+        .message.danger {
+            background: rgba(233, 69, 96, 0.2);
+            color: #e94560;
+            animation: pulse 0.5s infinite alternate;
+        }
+        
+        @keyframes pulse {
+            from { box-shadow: 0 0 5px rgba(233, 69, 96, 0.5); }
+            to { box-shadow: 0 0 20px rgba(233, 69, 96, 0.8); }
+        }
+        
+        .history {
+            margin-top: 20px;
+            text-align: left;
+            max-height: 150px;
+            overflow-y: auto;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .history-item {
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .warning {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #ff9a00;
+            text-align: center;
         }
     </style>
 </head>
 <body>
-    <div class="game-container">
-        <h1 style="color: white;">🐍 Змейка</h1>
-        <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <div class="container">
+        <h1>Русская Рулетка</h1>
+        
+        <div class="revolver">
+            <div class="revolver-body">
+                <div class="cylinder" id="cylinder">
+                    <!-- Камеры будут добавлены через JS -->
+                </div>
+                <div class="hammer" id="hammer"></div>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div>Выстрелы</div>
+                <div class="stat-value" id="shots-count">0</div>
+            </div>
+            <div class="stat-item">
+                <div>Осталось патронов</div>
+                <div class="stat-value" id="bullets-left">1</div>
+            </div>
+            <div class="stat-item">
+                <div>Шанс выжить</div>
+                <div class="stat-value" id="survival-chance">83%</div>
+            </div>
+        </div>
+        
         <div class="controls">
-            <div>Счет: <span id="score">0</span></div>
-            <button onclick="resetGame()">Новая игра</button>
-            <p>Используйте стрелки для управления</p>
+            <button id="spin-btn">Крутить барабан</button>
+            <button id="fire-btn" disabled>Выстрелить</button>
+            <button id="reset-btn">Новая игра</button>
+        </div>
+        
+        <div class="message" id="message">Готов к игре. Крутите барабан!</div>
+        
+        <div class="history">
+            <h3>История игры:</h3>
+            <div id="history-list"></div>
+        </div>
+        
+        <div class="warning">
+            ВНИМАНИЕ: Это всего лишь игра! Не пытайтесь повторить это в реальной жизни!
         </div>
     </div>
 
     <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const gridSize = 20;
-        const tileCount = canvas.width / gridSize;
-
-        let snake = [{x: 10, y: 10}];
-        let food = {x: 15, y: 15};
-        let dx = 0;
-        let dy = 0;
-        let score = 0;
-
-        function gameLoop() {
-            if (checkGameOver()) return;
+        document.addEventListener('DOMContentLoaded', function() {
+            // Элементы DOM
+            const cylinder = document.getElementById('cylinder');
+            const hammer = document.getElementById('hammer');
+            const spinBtn = document.getElementById('spin-btn');
+            const fireBtn = document.getElementById('fire-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const message = document.getElementById('message');
+            const shotsCount = document.getElementById('shots-count');
+            const bulletsLeft = document.getElementById('bullets-left');
+            const survivalChance = document.getElementById('survival-chance');
+            const historyList = document.getElementById('history-list');
             
-            clearCanvas();
-            moveSnake();
-            drawFood();
-            drawSnake();
+            // Константы игры
+            const CHAMBERS_COUNT = 6;
+            const BULLETS_COUNT = 1;
             
-            setTimeout(gameLoop, 100);
-        }
-
-        function clearCanvas() {
-            ctx.fillStyle = 'black';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-
-        function drawSnake() {
-            ctx.fillStyle = 'lime';
-            snake.forEach(segment => {
-                ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize-2, gridSize-2);
-            });
-        }
-
-        function drawFood() {
-            ctx.fillStyle = 'red';
-            ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize-2, gridSize-2);
-        }
-
-        function moveSnake() {
-            const head = {x: snake[0].x + dx, y: snake[0].y + dy};
-            snake.unshift(head);
-
-            if (head.x === food.x && head.y === food.y) {
-                score++;
-                document.getElementById('score').textContent = score;
-                generateFood();
-            } else {
-                snake.pop();
-            }
-        }
-
-        function generateFood() {
-            food.x = Math.floor(Math.random() * tileCount);
-            food.y = Math.floor(Math.random() * tileCount);
-        }
-
-        function checkGameOver() {
-            const head = snake[0];
+            // Состояние игры
+            let gameState = {
+                chambers: [],
+                currentChamber: 0,
+                bulletChamber: -1,
+                shotsFired: 0,
+                gameOver: false,
+                cylinderSpun: false
+            };
             
-            // Столкновение со стеной
-            if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount) {
-                alert('Игра окончена! Ваш счет: ' + score);
-                resetGame();
-                return true;
+            // Инициализация игры
+            function initGame() {
+                // Создаем камеры
+                cylinder.innerHTML = '';
+                gameState.chambers = [];
+                
+                for (let i = 0; i < CHAMBERS_COUNT; i++) {
+                    const chamber = document.createElement('div');
+                    chamber.className = 'chamber';
+                    chamber.textContent = i + 1;
+                    chamber.style.transform = `rotate(${i * 60}deg) translate(70px) rotate(-${i * 60}deg)`;
+                    cylinder.appendChild(chamber);
+                    gameState.chambers.push(chamber);
+                }
+                
+                // Размещаем патрон в случайной камере
+                gameState.bulletChamber = Math.floor(Math.random() * CHAMBERS_COUNT);
+                gameState.currentChamber = 0;
+                gameState.shotsFired = 0;
+                gameState.gameOver = false;
+                gameState.cylinderSpun = false;
+                
+                // Сбрасываем UI
+                hammer.classList.remove('cocked');
+                updateStats();
+                updateMessage('Готов к игре. Крутите барабан!', 'success');
+                spinBtn.disabled = false;
+                fireBtn.disabled = true;
+                
+                // Очищаем историю
+                historyList.innerHTML = '';
+                addHistory('Новая игра начата. Патрон в камере ' + (gameState.bulletChamber + 1));
             }
             
-            // Столкновение с собой
-            for (let i = 1; i < snake.length; i++) {
-                if (head.x === snake[i].x && head.y === snake[i].y) {
-                    alert('Игра окончена! Ваш счет: ' + score);
-                    resetGame();
-                    return true;
+            // Крутим барабан
+            function spinCylinder() {
+                if (gameState.gameOver) return;
+                
+                // Случайно выбираем стартовую позицию
+                gameState.currentChamber = Math.floor(Math.random() * CHAMBERS_COUNT);
+                gameState.cylinderSpun = true;
+                
+                // Анимация вращения
+                cylinder.style.transition = 'transform 1s ease';
+                cylinder.style.transform = `rotate(${720 + gameState.currentChamber * 60}deg)`;
+                
+                // Обновляем UI
+                updateMessage('Барабан прокручен. Можете стрелять!', 'success');
+                spinBtn.disabled = true;
+                fireBtn.disabled = false;
+                hammer.classList.add('cocked');
+                
+                addHistory('Барабан прокручен. Текущая позиция: ' + (gameState.currentChamber + 1));
+                
+                // Сбрасываем трансформацию после анимации
+                setTimeout(() => {
+                    cylinder.style.transition = 'none';
+                    cylinder.style.transform = `rotate(${gameState.currentChamber * 60}deg)`;
+                }, 1000);
+            }
+            
+            // Производим выстрел
+            function fire() {
+                if (gameState.gameOver || !gameState.cylinderSpun) return;
+                
+                // Проверяем, есть ли патрон в текущей камере
+                const isBullet = gameState.currentChamber === gameState.bulletChamber;
+                
+                // Обновляем статистику
+                gameState.shotsFired++;
+                
+                // Анимация курка
+                hammer.style.transition = 'transform 0.2s ease';
+                hammer.style.transform = 'rotate(10deg)';
+                
+                setTimeout(() => {
+                    hammer.style.transform = 'rotate(0deg)';
+                    
+                    // Обновляем камеру
+                    gameState.chambers[gameState.currentChamber].classList.add('fired');
+                    
+                    if (isBullet) {
+                        // Игрок проиграл
+                        gameState.gameOver = true;
+                        updateMessage('БАМ! Вы проиграли!', 'danger');
+                        addHistory('ВЫСТРЕЛ! Игра окончена.');
+                        fireBtn.disabled = true;
+                    } else {
+                        // Игрок выжил
+                        updateMessage('Щелк! Вы выжили!', 'success');
+                        addHistory('Щелк! Выстрел в камере ' + (gameState.currentChamber + 1) + ' был пустым.');
+                        
+                        // Переходим к следующей камере
+                        gameState.currentChamber = (gameState.currentChamber + 1) % CHAMBERS_COUNT;
+                        gameState.cylinderSpun = false;
+                        
+                        // Обновляем UI
+                        spinBtn.disabled = false;
+                        fireBtn.disabled = true;
+                        hammer.classList.remove('cocked');
+                    }
+                    
+                    updateStats();
+                }, 200);
+            }
+            
+            // Обновляем статистику
+            function updateStats() {
+                shotsCount.textContent = gameState.shotsFired;
+                
+                const bulletsRemaining = gameState.bulletChamber >= gameState.currentChamber ? 1 : 0;
+                bulletsLeft.textContent = bulletsRemaining;
+                
+                const emptyChambers = CHAMBERS_COUNT - gameState.currentChamber - (bulletsRemaining ? 1 : 0);
+                const chance = Math.round((emptyChambers / (CHAMBERS_COUNT - gameState.currentChamber)) * 100);
+                survivalChance.textContent = chance + '%';
+            }
+            
+            // Обновляем сообщение
+            function updateMessage(text, type) {
+                message.textContent = text;
+                message.className = 'message';
+                if (type) {
+                    message.classList.add(type);
                 }
             }
             
-            return false;
-        }
-
-        function resetGame() {
-            snake = [{x: 10, y: 10}];
-            dx = 0;
-            dy = 0;
-            score = 0;
-            document.getElementById('score').textContent = score;
-            generateFood();
-            gameLoop();
-        }
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowUp' && dy !== 1) {
-                dx = 0;
-                dy = -1;
-            } else if (e.key === 'ArrowDown' && dy !== -1) {
-                dx = 0;
-                dy = 1;
-            } else if (e.key === 'ArrowLeft' && dx !== 1) {
-                dx = -1;
-                dy = 0;
-            } else if (e.key === 'ArrowRight' && dx !== -1) {
-                dx = 1;
-                dy = 0;
+            // Добавляем запись в историю
+            function addHistory(text) {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                historyItem.textContent = text;
+                historyList.appendChild(historyItem);
+                historyList.scrollTop = historyList.scrollHeight;
             }
+            
+            // Назначаем обработчики событий
+            spinBtn.addEventListener('click', spinCylinder);
+            fireBtn.addEventListener('click', fire);
+            resetBtn.addEventListener('click', initGame);
+            
+            // Запускаем игру
+            initGame();
         });
-
-        generateFood();
-        gameLoop();
     </script>
 </body>
 </html>
