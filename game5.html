@@ -1,77 +1,181 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Игра Память</title>
+    <title>Пазл</title>
     <style>
-        .card {
-            width: 50px;
-            height: 50px;
-            background-color: #ccc;
-            display: inline-block;
-            margin: 5px;
+        body {
+            font-family: Arial, sans-serif;
             text-align: center;
-            line-height: 50px;
-            cursor: pointer;
+            background: linear-gradient(135deg, #a29bfe, #6c5ce7);
+            padding: 20px;
+            margin: 0;
+            min-height: 100vh;
         }
-        .hidden {
-            background-color: #666;
-            color: transparent;
+        .game-container {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .puzzle-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2px;
+            margin: 20px auto;
+            width: 306px;
+            height: 306px;
+            border: 2px solid #333;
+        }
+        .puzzle-piece {
+            width: 100px;
+            height: 100px;
+            background-size: 300px 300px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .puzzle-piece:hover {
+            transform: scale(1.05);
+        }
+        .controls {
+            margin: 20px 0;
+        }
+        button {
+            padding: 12px 25px;
+            margin: 10px;
+            border: none;
+            border-radius: 8px;
+            background: #00b894;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #00a085;
+        }
+        .message {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 20px 0;
+            min-height: 30px;
+            color: #2d3436;
         }
     </style>
 </head>
 <body>
-    <h1>Игра Память</h1>
-    <div id="game"></div>
+    <div class="game-container">
+        <h1>🧩 Пазл</h1>
+        <div class="message" id="message">Соберите пазл!</div>
+        <div class="puzzle-container" id="puzzleContainer"></div>
+        <div class="controls">
+            <button onclick="shufflePuzzle()">Перемешать</button>
+            <button onclick="solvePuzzle()">Решить</button>
+        </div>
+        <div>Ходы: <span id="moves">0</span></div>
+    </div>
 
     <script>
-        const symbols = ['A', 'A', 'B', 'B', 'C', 'C', 'D', 'D'];
-        let flippedCards = [];
-        let matchedPairs = 0;
+        const puzzleContainer = document.getElementById('puzzleContainer');
+        let moves = 0;
+        let emptyPos = {row: 2, col: 2};
 
-        // Перемешиваем карты
-        symbols.sort(() => Math.random() - 0.5);
-
-        // Создаем игровое поле
-        const gameDiv = document.getElementById('game');
-        symbols.forEach((symbol, index) => {
-            const card = document.createElement('div');
-            card.className = 'card hidden';
-            card.textContent = symbol;
-            card.dataset.index = index;
-            card.onclick = flipCard;
-            gameDiv.appendChild(card);
-        });
-
-        function flipCard() {
-            const card = this;
-            if (flippedCards.length < 2 && !card.classList.contains('revealed')) {
-                card.classList.remove('hidden');
-                flippedCards.push(card);
-                
-                if (flippedCards.length === 2) {
-                    setTimeout(checkMatch, 500);
+        function createPuzzle() {
+            puzzleContainer.innerHTML = '';
+            
+            for (let row = 0; row < 3; row++) {
+                for (let col = 0; col < 3; col++) {
+                    if (row === 2 && col === 2) continue;
+                    
+                    const piece = document.createElement('div');
+                    piece.className = 'puzzle-piece';
+                    piece.style.backgroundImage = 'url("https://picsum.photos/300")';
+                    piece.style.backgroundPosition = `-${col * 100}px -${row * 100}px`;
+                    piece.dataset.row = row;
+                    piece.dataset.col = col;
+                    piece.dataset.correctRow = row;
+                    piece.dataset.correctCol = col;
+                    
+                    piece.onclick = () => movePiece(row, col);
+                    puzzleContainer.appendChild(piece);
                 }
+            }
+            
+            updateMoves();
+        }
+
+        function movePiece(row, col) {
+            const isAdjacent = 
+                (Math.abs(row - emptyPos.row) === 1 && col === emptyPos.col) ||
+                (Math.abs(col - emptyPos.col) === 1 && row === emptyPos.row);
+            
+            if (isAdjacent) {
+                const piece = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                piece.dataset.row = emptyPos.row;
+                piece.dataset.col = emptyPos.col;
+                
+                emptyPos = {row, col};
+                moves++;
+                updateMoves();
+                checkWin();
             }
         }
 
-        function checkMatch() {
-            const [card1, card2] = flippedCards;
-            
-            if (card1.textContent === card2.textContent) {
-                card1.classList.add('revealed');
-                card2.classList.add('revealed');
-                matchedPairs++;
+        function shufflePuzzle() {
+            for (let i = 0; i < 100; i++) {
+                const directions = [
+                    {row: -1, col: 0}, {row: 1, col: 0},
+                    {row: 0, col: -1}, {row: 0, col: 1}
+                ];
                 
-                if (matchedPairs === symbols.length / 2) {
-                    alert('Поздравляем! Вы выиграли!');
-                }
-            } else {
-                card1.classList.add('hidden');
-                card2.classList.add('hidden');
+                const validMoves = directions.filter(dir => {
+                    const newRow = emptyPos.row + dir.row;
+                    const newCol = emptyPos.col + dir.col;
+                    return newRow >= 0 && newRow < 3 && newCol >= 0 && newCol < 3;
+                });
+                
+                const move = validMoves[Math.floor(Math.random() * validMoves.length)];
+                const pieceRow = emptyPos.row + move.row;
+                const pieceCol = emptyPos.col + move.col;
+                
+                movePiece(pieceRow, pieceCol);
             }
-            
-            flippedCards = [];
+            moves = 0;
+            updateMoves();
+            document.getElementById('message').textContent = 'Соберите пазл!';
         }
+
+        function solvePuzzle() {
+            emptyPos = {row: 2, col: 2};
+            createPuzzle();
+            moves = 0;
+            updateMoves();
+            document.getElementById('message').textContent = 'Пазл собран!';
+        }
+
+        function checkWin() {
+            const pieces = document.querySelectorAll('.puzzle-piece');
+            let solved = true;
+            
+            pieces.forEach(piece => {
+                if (piece.dataset.row !== piece.dataset.correctRow || 
+                    piece.dataset.col !== piece.dataset.correctCol) {
+                    solved = false;
+                }
+            });
+            
+            if (solved && emptyPos.row === 2 && emptyPos.col === 2) {
+                document.getElementById('message').textContent = '🎉 Поздравляем! Вы собрали пазл!';
+            }
+        }
+
+        function updateMoves() {
+            document.getElementById('moves').textContent = moves;
+        }
+
+        createPuzzle();
     </script>
 </body>
 </html>

@@ -2,66 +2,175 @@
 <html>
 <head>
     <title>Викторина</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .quiz-container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+        .question {
+            font-size: 24px;
+            margin-bottom: 30px;
+            color: #2d3436;
+        }
+        .options {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .option {
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 18px;
+        }
+        .option:hover {
+            background: #f1f2f6;
+            border-color: #74b9ff;
+        }
+        .option.correct {
+            background: #55efc4;
+            border-color: #00b894;
+        }
+        .option.wrong {
+            background: #ff7675;
+            border-color: #d63031;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            background: #00b894;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #00a085;
+        }
+        .score {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 20px;
+            color: #2d3436;
+        }
+    </style>
 </head>
 <body>
-    <h1>Простая викторина</h1>
-    <div id="question"></div>
-    <div id="answers"></div>
-    <p id="result"></p>
-    <p>Счет: <span id="score">0</span></p>
+    <div class="quiz-container">
+        <h1>🧠 Викторина</h1>
+        <div class="question" id="question"></div>
+        <div class="options" id="options"></div>
+        <button onclick="nextQuestion()" id="nextBtn">Следующий вопрос</button>
+        <div class="score">Счет: <span id="score">0</span></div>
+    </div>
 
     <script>
         const questions = [
             {
-                question: "Столица Франции?",
-                answers: ["Лондон", "Берлин", "Париж", "Мадрид"],
+                question: "Какая планета самая большая в Солнечной системе?",
+                options: ["Земля", "Марс", "Юпитер", "Сатурн"],
                 correct: 2
             },
             {
-                question: "2 + 2 = ?",
-                answers: ["3", "4", "5", "6"],
+                question: "Сколько цветов в радуге?",
+                options: ["5", "6", "7", "8"],
+                correct: 2
+            },
+            {
+                question: "Какое животное самое быстрое на суше?",
+                options: ["Лев", "Гепард", "Антилопа", "Лошадь"],
                 correct: 1
+            },
+            {
+                question: "Сколько костей в теле взрослого человека?",
+                options: ["196", "206", "216", "226"],
+                correct: 1
+            },
+            {
+                question: "Какая самая длинная река в мире?",
+                options: ["Амазонка", "Нил", "Янцзы", "Миссисипи"],
+                correct: 0
             }
         ];
 
         let currentQuestion = 0;
         let score = 0;
+        let answered = false;
 
-        function showQuestion() {
-            const q = questions[currentQuestion];
-            document.getElementById('question').textContent = q.question;
+        function loadQuestion() {
+            const question = questions[currentQuestion];
+            document.getElementById('question').textContent = question.question;
             
-            const answersDiv = document.getElementById('answers');
-            answersDiv.innerHTML = '';
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
             
-            q.answers.forEach((answer, index) => {
-                const button = document.createElement('button');
-                button.textContent = answer;
-                button.onclick = () => checkAnswer(index);
-                answersDiv.appendChild(button);
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option';
+                optionElement.textContent = option;
+                optionElement.onclick = () => checkAnswer(index);
+                optionsContainer.appendChild(optionElement);
             });
+            
+            document.getElementById('nextBtn').style.display = 'none';
+            answered = false;
         }
 
-        function checkAnswer(answerIndex) {
-            if (answerIndex === questions[currentQuestion].correct) {
+        function checkAnswer(selectedIndex) {
+            if (answered) return;
+            answered = true;
+            
+            const question = questions[currentQuestion];
+            const options = document.querySelectorAll('.option');
+            
+            options.forEach((option, index) => {
+                if (index === question.correct) {
+                    option.classList.add('correct');
+                } else if (index === selectedIndex) {
+                    option.classList.add('wrong');
+                }
+            });
+            
+            if (selectedIndex === question.correct) {
                 score++;
-                document.getElementById('result').textContent = "Правильно!";
-            } else {
-                document.getElementById('result').textContent = "Неправильно!";
+                document.getElementById('score').textContent = score;
             }
             
-            document.getElementById('score').textContent = score;
+            document.getElementById('nextBtn').style.display = 'inline-block';
+        }
+
+        function nextQuestion() {
             currentQuestion++;
-            
             if (currentQuestion < questions.length) {
-                showQuestion();
+                loadQuestion();
             } else {
-                document.getElementById('question').textContent = "Игра окончена!";
-                document.getElementById('answers').innerHTML = "";
+                alert(`Викторина завершена! Ваш счет: ${score}/${questions.length}`);
+                currentQuestion = 0;
+                score = 0;
+                document.getElementById('score').textContent = score;
+                loadQuestion();
             }
         }
 
-        showQuestion();
+        loadQuestion();
     </script>
 </body>
 </html>

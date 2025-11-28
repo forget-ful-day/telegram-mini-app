@@ -2,28 +2,80 @@
 <html>
 <head>
     <title>Угадай число</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 50px;
+        }
+        .game-container {
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            margin: 0 auto;
+            backdrop-filter: blur(10px);
+        }
+        input, button {
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background: #ff6b6b;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #ff5252;
+        }
+        #message {
+            font-size: 18px;
+            margin: 20px 0;
+            min-height: 30px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Угадай число от 1 до 100</h1>
-    <input type="number" id="guess" min="1" max="100">
-    <button onclick="checkGuess()">Проверить</button>
-    <p id="result"></p>
+    <div class="game-container">
+        <h1>Угадай число от 1 до 100</h1>
+        <input type="number" id="guess" min="1" max="100" placeholder="Введите число">
+        <button onclick="checkGuess()">Проверить</button>
+        <div id="message"></div>
+        <div>Попытки: <span id="attempts">0</span></div>
+    </div>
 
     <script>
-        const secretNumber = Math.floor(Math.random() * 100) + 1;
+        let randomNumber = Math.floor(Math.random() * 100) + 1;
         let attempts = 0;
 
         function checkGuess() {
             const guess = parseInt(document.getElementById('guess').value);
-            attempts++;
+            const message = document.getElementById('message');
+            const attemptsElement = document.getElementById('attempts');
             
-            if (guess === secretNumber) {
-                document.getElementById('result').textContent = 
-                    `Поздравляю! Вы угадали за ${attempts} попыток!`;
-            } else if (guess < secretNumber) {
-                document.getElementById('result').textContent = 'Слишком мало!';
+            if (isNaN(guess) || guess < 1 || guess > 100) {
+                message.textContent = "Введите число от 1 до 100!";
+                return;
+            }
+            
+            attempts++;
+            attemptsElement.textContent = attempts;
+            
+            if (guess === randomNumber) {
+                message.innerHTML = `🎉 Поздравляем! Вы угадали число ${randomNumber}!`;
+                message.style.color = '#4ecdc4';
+            } else if (guess < randomNumber) {
+                message.textContent = "Слишком маленькое число!";
+                message.style.color = '#ffd93d';
             } else {
-                document.getElementById('result').textContent = 'Слишком много!';
+                message.textContent = "Слишком большое число!";
+                message.style.color = '#ff6b6b';
             }
         }
     </script>
